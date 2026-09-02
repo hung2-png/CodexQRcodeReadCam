@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>學生 QR Code 簽到</title>
+  <title>學生 QR Code 掃描紀錄</title>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <style>
     *{box-sizing:border-box}
@@ -19,7 +19,6 @@
     video{width:95vw;max-width:640px;border:2px solid #333;border-radius:12px;background:#000;margin:16px auto 0;display:block}
     #result{margin-top:20px;font-size:1.8em;font-weight:bold;min-height:2em;padding:12px;border-radius:12px;background:#eef2f7}
     .success{background:#e7f8ee!important;color:#087443}
-    .duplicate{background:#fff4df!important;color:#9a5b00}
     .error{background:#ffebeb!important;color:#aa2020}
     .tip{color:#666;font-size:14px;margin-top:16px}
     canvas{display:none}
@@ -33,7 +32,7 @@
 </head>
 <body>
 <main>
-  <h2>📷 學生 QR Code 簽到</h2>
+  <h2>📷 學生 QR Code 掃描紀錄</h2>
   <div class="controls">
     <label for="cameraSelect">選擇攝影機：<select id="cameraSelect"><option value="">自動選擇攝影機</option></select></label>
     <button id="refreshBtn" type="button" class="secondary">重新偵測</button>
@@ -131,16 +130,16 @@ async function scanFrame(){
       lastCode=raw;
       lastAt=now;
       isProcessing=true;
-      show('資料處理中…');
+      show('資料寫入中…');
       
-      // 自動使用原生 google.script.run，擺脫網址綁定！
+      // 直接呼叫後端寫入當前試算表的 QRcodeData
       google.script.run
         .withSuccessHandler(result => {
-          show(result.message||'簽到完成', result.code==='SUCCESS'?'success':result.code==='DUPLICATE'?'duplicate':'error');
+          show(result.message || '已成功紀錄！', result.ok ? 'success' : 'error');
           isProcessing=false;
         })
         .withFailureHandler(err => {
-          show('簽到失敗：' + (err.message||err), 'error');
+          show('寫入失敗：' + (err.message||err), 'error');
           isProcessing=false;
         })
         .submitScan(raw);
